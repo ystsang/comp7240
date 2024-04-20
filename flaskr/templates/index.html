@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Movie Recommender System</title>
+    <title>Board Game Recommender System</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
@@ -25,7 +25,7 @@
             <nav :class="['navbar', 'is-active']" role="navigation" aria-label="main navigation">
                 <div class="navbar-brand">
                     <a class="navbar-item" href="/">
-                        <span class="is-size-3">Movies Recommender System</span>
+                        <span class="is-size-3">Board Game Recommender System</span>
                     </a>
 
                     <a role="button" :class="['navbar-burger', isActivityNavBar ? 'is-active' : '']" aria-label="menu"
@@ -67,12 +67,12 @@
                     <p class="mb-3">{{ recommendations_message }}</p>
 
                     <div class="columns is-mobile is-multiline">
-                        {% for movie in recommendations %}
+                        {% for game in recommendations %}
                         <div class="column is-2-fullhd is-2-desktop is-2-tablet is-6-mobile">
                             <div class="card">
                                 <div class="card-image">
                                     <figure class="image is-3by4">
-                                        <img src="{{ movie['cover_url'] }}"
+                                        <img src="{{ game['cover_url'] }}"
                                              onerror="this.src='https://placehold.co/480x640?text=No+Cover';"
                                              alt="">
                                     </figure>
@@ -80,16 +80,16 @@
                                 <div class="card-content p-2">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p style="font-size: 0.8rem; font-weight: bold">{{ movie['title']
+                                            <p style="font-size: 0.8rem; font-weight: bold">{{ game['title']
                                                 }}</p>
-                                            <p style="font-size: 0.8rem">{{ movie['release_date'] }}</p>
+                                            <p style="font-size: 0.8rem">{{ game['release_date'] }}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="card-footer p-2">
-                                    <button class="button is-small" @click="updateLike({{movie['movieId']}})">
-                                        <span :class="['fa fa-heart', inLikes({{movie['movieId']}}) ? 'checked': '']" > Like</span>
+                                    <button class="button is-small" @click="updateLike({{game['gameId']}})">
+                                        <span :class="['fa fa-heart', inLikes({{game['gameId']}}) ? 'checked': '']" > Like</span>
                                     </button>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
                     <p class="mb-3">{{ likes_similar_message }}</p>
 
                     <div class="columns is-mobile is-multiline">
-                        {% for movie in likes_similars %}
+                        {% for game in likes_similars %}
                         <div class="column is-2-fullhd is-2-desktop is-2-tablet is-6-mobile">
                             <div class="card">
                                 <div class="card-image">
@@ -117,16 +117,16 @@
                                 <div class="card-content p-2">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p style="font-size: 0.8rem; font-weight: bold">{{ movie['title']
+                                            <p style="font-size: 0.8rem; font-weight: bold">{{ game['title']
                                                 }}</p>
-                                            <p style="font-size: 0.8rem">{{ movie['release_date'] }}</p>
+                                            <p style="font-size: 0.8rem">{{ game['release_date'] }}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="card-footer p-2">
-                                    <button class="button is-small" @click="updateLike({{movie['movieId']}})">
-                                        <span :class="['fa fa-heart', inLikes({{movie['movieId']}}) ? 'checked': '']" > Like</span>
+                                    <button class="button is-small" @click="updateLike({{game['gameId']}})">
+                                        <span :class="['fa fa-heart', inLikes({{game['gameId']}}) ? 'checked': '']" > Like</span>
                                     </button>
                                 </div>
                             </div>
@@ -145,12 +145,12 @@
                     </p>
 
                     <div class="columns is-mobile pb-3" style="overflow: scroll">
-                        {% for movie in likes %}
+                        {% for game in likes %}
                         <div class="column is-2-fullhd is-2-desktop is-2-tablet is-6-mobile">
                             <div class="card">
                                 <div class="card-image">
                                     <figure class="image is-3by4">
-                                        <img src="{{ movie['cover_url'] }}"
+                                        <img src="{{ game['cover_url'] }}"
                                              onerror="this.src='https://placehold.co/480x640?text=No+Cover';"
                                              alt="">
                                     </figure>
@@ -158,16 +158,16 @@
                                 <div class="card-content p-2">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p style="font-size: 0.8rem; font-weight: bold">{{ movie['title']
+                                            <p style="font-size: 0.8rem; font-weight: bold">{{ game['title']
                                                 }}</p>
-                                            <p style="font-size: 0.8rem">{{ movie['release_date'] }}</p>
+                                            <p style="font-size: 0.8rem">{{ game['release_date'] }}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="card-footer p-2">
-                                    <button class="button is-small" @click="updateLike({{movie['movieId']}})">
-                                        <span :class="['fa fa-heart', inLikes({{movie['movieId']}}) ? 'checked': '']" > Like</span>
+                                    <button class="button is-small" @click="updateLike({{game['gameId']}})">
+                                        <span :class="['fa fa-heart', inLikes({{game['gameId']}}) ? 'checked': '']" > Like</span>
                                     </button>
                                 </div>
                             </div>
@@ -201,37 +201,37 @@
             </div>
         </div>
 
-        <div :class="['modal', showMovieRate ? 'is-active' : '']">
+        <div :class="['modal', showGameRate ? 'is-active' : '']">
             <div class="modal-background"></div>
             <div class="modal-card" style="max-width: 1000px">
                 <header class="modal-card-head">
-                    <p class="modal-card-title">Please rate the following movies.</p>
+                    <p class="modal-card-title">Please rate the following games.</p>
                 </header>
                 <div class="modal-card-body">
                     <div class="columns is-mobile is-multiline">
-                        {% for movie in default_genres_movies %}
+                        {% for game in default_genres_games %}
                         <div class="column is-3-fullhd is-3-desktop is-3-tablet is-6-mobile">
                             <div class="card">
                                 <div class="card-image">
                                     <figure class="image is-3by4">
-                                        <img src="{{ movie['cover_url'] }}"
+                                        <img src="{{ game['cover_url'] }}"
                                              onerror="this.src='https://placehold.co/480x640?text=No+Cover';" alt="">
                                     </figure>
                                 </div>
                                 <div class="card-content p-2">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p style="font-size: 0.8rem; font-weight: bold">{{ movie['title']
+                                            <p style="font-size: 0.8rem; font-weight: bold">{{ game['title']
                                                 }}</p>
-                                            <p style="font-size: 0.8rem">{{ movie['release_date'] }}</p>
+                                            <p style="font-size: 0.8rem">{{ game['release_date'] }}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="card-footer p-2">
-                                    <template v-for="rate in [1, 2, 3, 4, 5]">
-                                        <span :class="['fa fa-star px-1 star', getRate({{movie['movieId']}})[1] >= rate ? 'checked': '']"
-                                              @click="updateRate({{movie['movieId']}}, rate)"></span>
+                                    <template v-for="rate in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                                        <span :class="['fa fa-star px-1 star', getRate({{game['gameId']}})[1] >= rate ? 'checked': '']"
+                                              @click="updateRate({{game['gameId']}}, rate)"></span>
                                     </template>
                                 </div>
                             </div>
@@ -241,7 +241,7 @@
                 </div>
                 <footer class="modal-card-foot">
                     <button class="button is-link" :disabled="userRates.length == 0"
-                            @click="showMovieRate = false; reloadPage()">Save
+                            @click="showGameRate = false; reloadPage()">Save
                     </button>
                 </footer>
             </div>
@@ -278,7 +278,7 @@
                 isLoading.value = false
 
                 showGenres.value = genres.value.length === 0
-                showMovieRate.value = (genres.value.length > 0 && userRates.value.length === 0)
+                showGameRate.value = (genres.value.length > 0 && userRates.value.length === 0)
             })
 
             function cleanAll() {
@@ -317,14 +317,14 @@
                 reloadPage()
             }
 
-            // ==== Movie Rate Operation ====
-            const showMovieRate = ref(false)
+            // ==== Game Rate Operation ====
+            const showGameRate = ref(false)
             const userRates = ref({{user_rates | tojson}}) // If this place shows error, please check the format: ref({{user_rates | tojson}})
 
-            function getRate(movieId) {
+            function getRate(gameId) {
                 for (let index in userRates.value) {
                     let record = userRates.value[index].split('|')
-                    if (parseInt(record[1]) === movieId) {
+                    if (parseInt(record[1]) === gameId) {
                         return [index, record[2]]
                     }
                 }
@@ -332,10 +332,10 @@
                 return [-1, -1]
             }
 
-            function updateRate(movieId, rate) {
-                let record = '611' + '|' + movieId + '|' + rate + '|' + '0' //  total 610 users, so the new user id is 944
+            function updateRate(gameId, rate) {
+                let record = '51' + '|' + gameId + '|' + rate + '|' + '0' //  total 610 users, so the new user id is 944
 
-                const index = getRate(movieId)[0];
+                const index = getRate(gameId)[0];
                 if (index > -1) {
                     userRates.value[index] = record;
                 } else {
@@ -344,24 +344,24 @@
                 document.cookie = "user_rates=" + userRates.value;
             }
 
-            // ==== Movie Like Operation ====
+            // ==== Game Like Operation ====
             const userLikes = ref({{user_likes | tojson}}) // If this place shows error, please check the format: ref({{user_likes | tojson}})
 
-            function updateLike(_movieId) {
-                let movieId = _movieId.toString()
-                const index = userLikes.value.indexOf(movieId);
+            function updateLike(_gameId) {
+                let gameId = _gameId.toString()
+                const index = userLikes.value.indexOf(gameId);
                 if (index > -1) {
                     userLikes.value.splice(index, 1);
                 } else {
-                    userLikes.value.push(movieId);
+                    userLikes.value.push(gameId);
                 }
 
                 document.cookie = "user_likes=" + userLikes.value;
 
                 reloadPage();
             }
-            function inLikes(movieId) {
-                return userLikes.value.includes(movieId.toString())
+            function inLikes(gameId) {
+                return userLikes.value.includes(gameId.toString())
             }
 
 
@@ -380,7 +380,7 @@
                 inGenres,
                 saveGenres,
 
-                showMovieRate,
+                showGameRate,
                 userRates,
                 getRate,
                 updateRate,

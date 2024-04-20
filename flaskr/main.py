@@ -11,15 +11,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
-movies, genres, rates = loadData()
+games, genres, rates = loadData()
 
 
 @bp.route('/', methods=('GET', 'POST'))
 def index():
 
     # Default Genres List
-    default_genres = genres.to_dict('records')[:2]
-
+    default_genres = genres.to_dict('records')
     # User Genres
     user_genres = request.cookies.get('user_genres')
     if user_genres:
@@ -41,22 +40,22 @@ def index():
     else:
         user_likes = []
 
-    default_genres_movies = getMoviesByGenres(user_genres)[:1]
-    recommendations_movies, recommendations_message = getRecommendationBy(user_rates)
-    likes_similar_movies, likes_similar_message = getLikedSimilarBy([int(numeric_string) for numeric_string in user_likes])
-    likes_movies = getUserLikesBy(user_likes)
+    default_genres_games = getGamesByGenres(user_genres)
+    recommendations_games, recommendations_message = getRecommendationBy(user_rates)[:12]
+    likes_similar_games, likes_similar_message = getLikedSimilarBy([int(numeric_string) for numeric_string in user_likes])
+    likes_games = getUserLikesBy(user_likes)
 
     return render_template('index.html',
                            genres=default_genres,
                            user_genres=user_genres,
                            user_rates=user_rates,
                            user_likes=user_likes,
-                           default_genres_movies=default_genres_movies,
-                           recommendations=recommendations_movies,
+                           default_genres_games=default_genres_games,
+                           recommendations=recommendations_games,
                            recommendations_message=recommendations_message,
-                           likes_similars=likes_similar_movies,
+                           likes_similars=likes_similar_games,
                            likes_similar_message=likes_similar_message,
-                           likes=likes_movies,
+                           likes=likes_games,
                            )
 
 
@@ -64,16 +63,16 @@ def getUserLikesBy(user_likes):
     results = []
 
     if len(user_likes) > 0:
-        mask = movies['movieId'].isin([int(movieId) for movieId in user_likes])
-        results = movies.loc[mask]
+        mask = games['gameId'].isin([int(gameId) for gameId in user_likes])
+        results = games.loc[mask]
 
         original_orders = pd.DataFrame()
         for _id in user_likes:
-            movie = results.loc[results['movieId'] == int(_id)]
+            game = results.loc[results['gameId'] == int(_id)]
             if len(original_orders) == 0:
-                original_orders = movie
+                original_orders = game
             else:
-                original_orders = pd.concat([movie, original_orders])
+                original_orders = pd.concat([game, original_orders])
         results = original_orders
 
     # return the result
@@ -82,7 +81,7 @@ def getUserLikesBy(user_likes):
     return results
 
 
-def getMoviesByGenres(user_genres):
+def getGamesByGenres(user_genres):
     results = []
 
     # ====  Do some operations ====
@@ -92,9 +91,9 @@ def getMoviesByGenres(user_genres):
         user_genres = [1 if has is True else 0 for has in genres_mask]
         user_genres_df = pd.DataFrame(user_genres)
         user_genres_df.index = genres['name']
-        movies_genres = movies.iloc[:, 5:]
-        mask = (movies_genres.dot(user_genres_df) > 0).squeeze()
-        results = movies.loc[mask][:30]
+        games_genres = games.iloc[:, 5:]
+        mask = (games_genres.dot(user_genres_df) > 0).squeeze()
+        results = games.loc[mask][:30]
 
     # ==== End ====
 
@@ -113,7 +112,7 @@ def getRecommendationBy(user_rates):
     # Check if there are any user_rates
     if len(user_rates) > 0:
         # Initialize a reader with rating scale from 1 to 5
-        reader = Reader(rating_scale=(1, 5))
+        reader = Reader(rating_scale=(1, 10))
 
         algo = KNNBasic(sim_options={'name': 'pearson', 'user_based': True})
 
@@ -133,7 +132,7 @@ def getRecommendationBy(user_rates):
         algo.fit(trainset)
 
         # Convert the raw user id to the inner user id using algo.trainset
-        inner_id = trainset.to_inner_uid(611)
+        inner_id = trainset.to_inner_uid(51)
 
         # Get the nearest neighbors of the inner_id
         neighbors = algo.get_neighbors(inner_id, k=1)
@@ -141,16 +140,16 @@ def getRecommendationBy(user_rates):
         # Convert the inner user ids of the neighbors back to raw user ids
         neighbors_uid = [algo.trainset.to_raw_uid(x) for x in neighbors]
 
-        # Filter out the movies this neighbor likes.
-        results_movies = rates[rates['userId'].isin(neighbors_uid)]
-        moviesIds = results_movies[results_movies['rating'] > 2.5]['movieId']
+        # Filter out the games this neighbor likes.
+        results_games = rates[rates['userId'].isin(neighbors_uid)]
+        gamesIds = results_games[results_games['rating'] > 5]['gameId']
 
-        # Convert the movie ids to details.
-        results = movies[movies['movieId'].isin(moviesIds)][:12]
+        # Convert the game ids to details.
+        results = games[games['gameId'].isin(gamesIds)][:12]
 
     # Return the result
     if len(results) > 0:
-        return results.to_dict('records'), "These movies are recommended based on your ratings."
+        return results.to_dict('records'), "These games are recommended based on your ratings."
     return results, "No recommendations."
     # ==== End ====
 
@@ -163,7 +162,7 @@ def getLikedSimilarBy(user_likes):
     if len(user_likes) > 0:
 
         # Step 1: Representing items with one-hot vectors
-        item_rep_matrix, item_rep_vector, feature_list = item_representation_based_movie_genres(movies)
+        item_rep_matrix, item_rep_vector, feature_list = item_representation_based_game_genres(games)
 
         # Step 2: Building user profile
         user_profile = build_user_profile(user_likes, item_rep_vector, feature_list)
@@ -173,26 +172,26 @@ def getLikedSimilarBy(user_likes):
 
     # Return the result
     if len(results) > 0:
-        return results.to_dict('records'), "The movies are similar to your liked movies."
-    return results, "No similar movies found."
+        return results.to_dict('records'), "The games are similar to your liked games."
+    return results, "No similar games found."
 
     # ==== End ====
 
 
-def item_representation_based_movie_genres(movies_df):
-    movies_with_genres = movies_df.copy(deep=True)
+def item_representation_based_game_genres(games_df):
+    games_with_genres = games_df.copy(deep=True)
 
-    genre_list = movies_with_genres.columns[5:]
-    movies_genre_matrix = movies_with_genres[genre_list].to_numpy()
-    return movies_genre_matrix, movies_with_genres, genre_list
+    genre_list = games_with_genres.columns[5:]
+    games_genre_matrix = games_with_genres[genre_list].to_numpy()
+    return games_genre_matrix, games_with_genres, genre_list
 
 
-def build_user_profile(movieIds, item_rep_vector, feature_list, normalized=True):
+def build_user_profile(gameIds, item_rep_vector, feature_list, normalized=True):
 
     ## Calculate item representation matrix to represent user profiles
-    user_movie_rating_df = item_rep_vector[item_rep_vector['movieId'].isin(movieIds)]
-    user_movie_df = user_movie_rating_df[feature_list].mean()
-    user_profile = user_movie_df.T
+    user_game_rating_df = item_rep_vector[item_rep_vector['gameId'].isin(gameIds)]
+    user_game_df = user_game_rating_df[feature_list].mean()
+    user_profile = user_game_df.T
 
     if normalized:
         user_profile = user_profile / sum(user_profile.values)
@@ -200,16 +199,27 @@ def build_user_profile(movieIds, item_rep_vector, feature_list, normalized=True)
     return user_profile
 
 
-def generate_recommendation_results(user_profile,item_rep_matrix, movies_data, k=12):
-
+def generate_recommendation_results(user_profile, item_rep_matrix, games_data, k=12):
+    # Convert user profile to a NumPy array
     u_v = user_profile.values
+    # Convert the user profile to a 2D array
     u_v_matrix = [u_v]
 
-    # Comput the cosine similarity
+    # Check for NaN values in user_profile and item_rep_matrix and handle them
+    # Fill NaN values with 0 or any other appropriate value
+    u_v_matrix = pd.DataFrame(u_v_matrix).fillna(0).values
+    item_rep_matrix = pd.DataFrame(item_rep_matrix).fillna(0).values
+
+    # Compute the cosine similarity
     recommendation_table = cosine_similarity(u_v_matrix, item_rep_matrix)
-
-    recommendation_table_df = movies_data.copy(deep=True)
+    
+    # Create a copy of the games data
+    recommendation_table_df = games_data.copy(deep=True)
+    # Add the similarity scores to the data frame
     recommendation_table_df['similarity'] = recommendation_table[0]
-    rec_result = recommendation_table_df.sort_values(by=['similarity'], ascending=False)[:k]
+    
+    # Sort the data frame by similarity scores in descending order and take the top k results
+    rec_result = recommendation_table_df.sort_values(by='similarity', ascending=False).head(k)
 
+    # Return the top k results as a DataFrame
     return rec_result
